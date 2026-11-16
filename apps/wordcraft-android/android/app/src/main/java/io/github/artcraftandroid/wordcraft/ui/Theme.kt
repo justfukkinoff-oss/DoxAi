@@ -20,7 +20,17 @@ object WordColors {
     var dark by mutableStateOf(false)
         internal set
 
-    private fun pick(light: Long, dark: Long) = Color(if (this.dark) dark else light)
+    /** Amoled Black: the dark colours, with every background pure black. */
+    var amoled by mutableStateOf(false)
+        internal set
+
+    private fun pick(light: Long, dark: Long, amoledDark: Long = dark) = Color(
+        when {
+            this.amoled -> amoledDark
+            this.dark -> dark
+            else -> light
+        },
+    )
 
     /** Tab and panel titles, their icons, the selection. */
     val Accent get() = pick(0xFF3B5BDB, 0xFF7C93F0)
@@ -31,7 +41,7 @@ object WordColors {
 
     /** The tab list: its rows, the current tab's row, and their labels. */
     val PopupFill get() = pick(0xFF3B5BDB, 0xFF212121)
-    val PopupCurrent get() = pick(0xFFF3F3F3, 0xFF000000)
+    val PopupCurrent get() = pick(0xFFF3F3F3, 0xFF000000, 0xFF000000)
     val OnPopup = Color(0xFFFFFFFF)
     val OnPopupCurrent get() = pick(0xFF2B44A8, 0xFF5B84EC)
 
@@ -48,52 +58,52 @@ object WordColors {
     val HeaderIconDisabled get() = pick(0xFF99A7E1, 0xFF575757)
 
     /** Bottom sheets (the header's overflow). */
-    val Sheet get() = pick(0xFFFFFFFF, 0xFF1F1F1F)
+    val Sheet get() = pick(0xFFFFFFFF, 0xFF1F1F1F, 0xFF000000)
     /** The grip at the top of a sheet (the dark one measured on the reference). */
-    val SheetGrip get() = pick(0xFFD2D2D2, 0xFF4D4D4D)
+    val SheetGrip get() = pick(0xFFD2D2D2, 0xFF4D4D4D, 0xFF3A3A3A)
 
     /** The floating toolbar's icons, and the circle behind a button that is on. */
     val OnPill get() = pick(0xFF242424, 0xFFFFFFFF)
     val PillOn get() = pick(0xFFDADADA, 0xFF575757)
 
     /** Bars at the top, the floating toolbar and pill. */
-    val Bar get() = pick(0xFFFFFFFF, 0xFF292929)
-    val BarEdge get() = pick(0xFFE4E4E4, 0xFF303030)
+    val Bar get() = pick(0xFFFFFFFF, 0xFF292929, 0xFF000000)
+    val BarEdge get() = pick(0xFFE4E4E4, 0xFF303030, 0xFF1F1F1F)
 
     /** Behind the status bar. */
-    val StatusBand get() = pick(0xFFFFFFFF, 0xFF212121)
+    val StatusBand get() = pick(0xFFFFFFFF, 0xFF212121, 0xFF000000)
 
     /** Text and icons on the bars and in the palette. */
     val OnBar get() = pick(0xFF505050, 0xFFE1E1E1)
     val Disabled get() = pick(0xFFB9B9B9, 0xFF666666)
 
     /** The palette's header. */
-    val Strip get() = pick(0xFFE6E6E6, 0xFF212121)
+    val Strip get() = pick(0xFFE6E6E6, 0xFF212121, 0xFF000000)
     val OnStrip get() = pick(0xFF3A3A38, 0xFFD4D4D4)
-    val StripMore get() = pick(0xFFD2D2D2, 0xFF303030)
-    val HeaderDivider get() = pick(0xFFC5C5C5, 0xFF303030)
+    val StripMore get() = pick(0xFFD2D2D2, 0xFF303030, 0xFF1F1F1F)
+    val HeaderDivider get() = pick(0xFFC5C5C5, 0xFF303030, 0xFF1F1F1F)
 
     /** The palette's lists. */
-    val Surface get() = pick(0xFFFFFFFF, 0xFF141414)
+    val Surface get() = pick(0xFFFFFFFF, 0xFF141414, 0xFF000000)
     val OnSurface get() = pick(0xFF505050, 0xFFE1E1E1)
-    val Divider get() = pick(0xFFF3F3F3, 0xFF292929)
-    val Section get() = pick(0xFFE6E6E6, 0xFF404040)
-    val Pressed get() = pick(0xFFD2D2D2, 0xFF303030)
+    val Divider get() = pick(0xFFF3F3F3, 0xFF292929, 0xFF1F1F1F)
+    val Section get() = pick(0xFFE6E6E6, 0xFF404040, 0xFF1A1A1A)
+    val Pressed get() = pick(0xFFD2D2D2, 0xFF303030, 0xFF1F1F1F)
 
     /** Around and between the pages, and the pages themselves (dark pages are near-black). */
-    val Canvas get() = pick(0xFFF7F7F7, 0xFF141414)
-    val Page get() = pick(0xFFFFFFFF, 0xFF141414)
-    val DarkPage = Color(0xFF141414)
+    val Canvas get() = pick(0xFFF7F7F7, 0xFF141414, 0xFF000000)
+    val Page get() = pick(0xFFFFFFFF, 0xFF141414, 0xFF000000)
+    val DarkPage get() = if (amoled) Color(0xFF000000) else Color(0xFF141414)
 
     /** Settings: the page behind them, section titles' rules. */
     val SettingsBack get() = pick(0xFFFFFFFF, 0xFF000000)
     val OnSettings get() = pick(0xFF242424, 0xFFE1E1E1)
     val SettingsValue get() = pick(0xFF616161, 0xFFACACAC)
-    val PageBorder get() = pick(0xFFC6C6C6, 0xFF303030)
+    val PageBorder get() = pick(0xFFC6C6C6, 0xFF303030, 0xFF1F1F1F)
 
     /** Find: its bar, the field in it, the hint, and the matches (the selected one darker). */
-    val FindBar get() = pick(0xFFE6E6E6, 0xFF303030)
-    val FindField get() = pick(0xFFFFFFFF, 0xFF212121)
+    val FindBar get() = pick(0xFFE6E6E6, 0xFF303030, 0xFF1A1A1A)
+    val FindField get() = pick(0xFFFFFFFF, 0xFF212121, 0xFF0D0D0D)
     val FindHint get() = pick(0xFF8A8A8A, 0xFFACACAC)
     // dark: screened over the page to the reference's olives (measured, converted from P3)
     val MatchCurrent get() = pick(0xFFC7BA64, 0xFF7C6E26)
@@ -131,16 +141,18 @@ object WordColors {
     val FontColorDefault = Color(0xFFFF0000)
 }
 
-/** The app's theme: [choice] is `system` (the phone's), `light` or `dark`. */
+/** The app's theme: [choice] is `system` (the phone's), `light`, `dark` or `amoled` (pure black). */
 @Composable
 fun WordcraftTheme(choice: String = "system", content: @Composable () -> Unit) {
     val dark = when (choice) {
         "light" -> false
-        "dark" -> true
+        "dark", "amoled" -> true
         else -> isSystemInDarkTheme()
     }
+    val amoled = choice == "amoled"
     // set before anything below reads a colour
     if (WordColors.dark != dark) WordColors.dark = dark
+    if (WordColors.amoled != amoled) WordColors.amoled = amoled
     MaterialTheme(
         colorScheme = if (dark) {
             darkColorScheme(primary = WordColors.Accent, surface = WordColors.Surface, onSurface = WordColors.OnSurface)

@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- documents other apps open with WordCraft by path (pickers need no permission) -->
+    <!-- documents other apps open with DoxAi by path (pickers need no permission) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+
+    <!-- the agent (MCP) server: a loopback-only HTTP endpoint a computer can reach with adb reverse -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <application
         android:name=".WordcraftApplication"
@@ -24,7 +29,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- documents other apps open or edit with WordCraft -->
+            <!-- documents other apps open or edit with DoxAi -->
             <intent-filter android:label="@string/open_with">
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
@@ -43,7 +48,13 @@
             </intent-filter>
         </activity>
 
-        <!-- WordCraft's files handed to other apps (share, export) -->
+        <!-- the agent (MCP) server, hosted while the app runs -->
+        <service
+            android:name=".mcp.McpService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!-- DoxAi's files handed to other apps (share, export) -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.files"

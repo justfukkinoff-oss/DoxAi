@@ -21,6 +21,8 @@ import io.github.artcraftandroid.wordcraft.engine.DocumentFiles
 import io.github.artcraftandroid.wordcraft.engine.Engine
 import io.github.artcraftandroid.wordcraft.engine.toBitmap
 import io.github.artcraftandroid.wordcraft.engine.userMessage
+import io.github.artcraftandroid.wordcraft.mcp.McpBridge
+import io.github.artcraftandroid.wordcraft.mcp.McpService
 import kotlin.math.abs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -212,7 +214,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         loadRecent()
         DocumentFiles.clearCache(app)
         viewModelScope.launch {
-            engineAsync.await().onSuccess { engine = it }.onFailure { message = "WordCraft couldn't start: ${it.userMessage}" }
+            engineAsync.await().onSuccess { engine = it }.onFailure { message = "DoxAi couldn't start: ${it.userMessage}" }
         }
     }
 
@@ -516,7 +518,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     private val prefs = app.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
 
-    /** Theme: `system` (follow the phone), `light` or `dark`. */
+    /** Theme: `system` (follow the phone), `light`, `dark` or `amoled`. */
     var themeChoice by mutableStateOf(prefs.getString("theme", "system") ?: "system")
         private set
 
@@ -531,6 +533,63 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun chooseTheme(choice: String) {
         themeChoice = choice
         prefs.edit().putString("theme", choice).apply()
+    }
+
+    /** The agent (MCP) server runs while this is on. */
+    var mcpOn by mutableStateOf(prefs.getBoolean("mcp", false))
+        private set
+
+    fun chooseMcpOn(on: Boolean) {
+        mcpOn = on
+        prefs.edit().putBoolean("mcp", on).apply()
+        McpService.setRunning(getApplication(), on)
+    }
+
+    /** What the agent server may call on the app's behalf. */
+    private val mcpProvider = object : McpBridge.Provider {
+        override val hasDocument get() = document != null
+        override val documentName get() = document?.name
+
+        override suspend fun command(id: String, params: String): String? {
+            val e = engineAsync.await().getOrNull() ?: return null
+            commitComposing(e)
+            val out = runCatching { e.command { execute(id, params) } }.getOrNull()
+            refresh(e)
+            return out
+        }
+
+        override suspend fun selection(): String? {
+            val e = engineAsync.await().getOrNull() ?: return null
+            return runCatching { e.command { selectionView().toString() } }.getOrNull()
+        }
+
+        override suspend fun typeText(text: String): Boolean {
+            val e = engineAsync.await().getOrNull() ?: return false
+            val ok = runCatching { e.command { type_text(text) } }.isSuccess
+            if (ok) refresh(e)
+            return ok
+        }
+
+        override suspend fun save(): Boolean {
+            val e = engineAsync.await().getOrNull() ?: return false
+            val doc = document ?: return false
+            if (doc.uri == null || !doc.writable) return false
+            commitComposing(e)
+            val bytes = e.command { saveBytes(saveName(doc.name)) }
+            val ok = withContext(Dispatchers.IO) { DocumentFiles.write(getApplication(), doc.uri, bytes) }
+            if (ok) refresh(e)
+            return ok
+        }
+
+        override suspend fun exportPdf(): ByteArray? {
+            val e = engineAsync.await().getOrNull() ?: return null
+            commitComposing(e)
+            return runCatching { e.command { exportBytes("print.pdf") } }.getOrNull()
+        }
+    }
+
+    init {
+        McpBridge.attach(mcpProvider)
     }
 
     fun chooseStartInMobileView(on: Boolean) {
@@ -976,7 +1035,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val text = o?.optString("text").orEmpty()
         val html = o?.optString("html")?.takeIf { it.isNotBlank() }
         if (text.isNotEmpty()) {
-            val clip = if (html != null) android.content.ClipData.newHtmlText("WordCraft", text, html) else android.content.ClipData.newPlainText("WordCraft", text)
+            val clip = if (html != null) android.content.ClipData.newHtmlText("DoxAi", text, html) else android.content.ClipData.newPlainText("DoxAi", text)
             runCatching { clipboard?.setPrimaryClip(clip) }
         }
         contextBar = false

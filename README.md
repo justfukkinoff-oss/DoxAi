@@ -2,7 +2,29 @@
   <img src="assets/app-icon/wordcraft-1024.png" alt="WordCraft's app icon" width="128">
 </p>
 
-<h1 align="center">WordCraft for Android</h1>
+<h1 align="center">DoxAi</h1>
+
+<p align="center">
+  <b>DoxAi is a fork of WordCraft for Android</b>: the same Rust engine and editor, renamed and
+  extended with an AMOLED black theme and a built-in
+  <a href="https://modelcontextprotocol.io">MCP</a> agent server, so AI agents can edit the open
+  document while the app stays fully usable by hand.
+</p>
+
+## Agent (MCP) server
+
+Settings → Agent (MCP) → turn **Agent Server** on. DoxAi then hosts an MCP server over Streamable
+HTTP, on loopback only:
+
+- **Endpoint:** `http://127.0.0.1:8636/mcp`
+- **Auth:** `Authorization: Bearer <token>` — the token is shown in Settings
+- **From a computer:** `adb reverse tcp:8636 tcp:8636`, then point your MCP client at
+  `http://127.0.0.1:8636/mcp` with the token
+
+Tools: `get_document_info`, `get_selection`, `type_text`, `insert_table`, `insert_picture`,
+`insert_link`, `add_comment`, `save_document`, `export_pdf`, `run_command` (any engine command the
+UI can run, e.g. formatting, lists, margins, headers) and `list_commands`. Agent edits run on the
+same engine thread as hand edits, so both share one undo history.
 
 <p align="center">
   <b>WordCraft-android is an open-source reimplementation of the Microsoft Word Android app, created using the same Rust engine, <a href="https://github.com/storytold/wordcraft">WordCraft</a>, as the desktop app, and built with a Kotlin/Jetpack Compose UI framework.</b><br>

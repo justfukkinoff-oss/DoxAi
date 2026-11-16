@@ -38,9 +38,11 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.artcraftandroid.wordcraft.mcp.DoxAiMcpServer
 import io.github.artcraftandroid.wordcraft.ui.AppViewModel
 import io.github.artcraftandroid.wordcraft.ui.LucideIcons
 import io.github.artcraftandroid.wordcraft.ui.WordColors
@@ -193,13 +195,22 @@ fun SettingsScreen(vm: AppViewModel, engineVersion: String) {
             SettingsItem("Theme", THEMES[vm.themeChoice] ?: "System Default") { picking = true }
             SettingsLine()
             SettingsSection("General")
-            SettingsSwitch("Default View", "Start WordCraft in Mobile View", vm.startInMobileView, vm::chooseStartInMobileView)
+            SettingsSwitch("Default View", "Start DoxAi in Mobile View", vm.startInMobileView, vm::chooseStartInMobileView)
             SettingsSwitch("AutoSave", "Automatically save files", vm.autoSaveOn, vm::chooseAutoSave)
             SettingsLine()
+            SettingsSection("Agent (MCP)")
+            SettingsSwitch("Agent Server", "Let AI agents edit the open document over MCP", vm.mcpOn, vm::chooseMcpOn)
+            if (vm.mcpOn) {
+                val context = LocalContext.current
+                SettingsItem("Endpoint", DoxAiMcpServer.URL)
+                SettingsItem("Token", DoxAiMcpServer.token(context))
+                SettingsItem("Reach it over USB", "adb reverse tcp:${DoxAiMcpServer.PORT} tcp:${DoxAiMcpServer.PORT}")
+            }
+            SettingsLine()
             SettingsSection("About")
-            SettingsItem("WordCraft", "Version $engineVersion")
+            SettingsItem("DoxAi", "Version $engineVersion")
             Text(
-                "An open-source word processor for Android, built on the WordCraft engine. It is not affiliated with or endorsed by Microsoft; Word is a trademark of Microsoft.",
+                "An open-source word processor for Android with a built-in MCP agent server, built on the WordCraft engine. It is not affiliated with or endorsed by Microsoft; Word is a trademark of Microsoft.",
                 color = WordColors.SettingsValue,
                 fontSize = 14.sp,
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
@@ -243,7 +254,7 @@ fun SettingsScreen(vm: AppViewModel, engineVersion: String) {
 }
 
 /** The themes Settings offers. */
-private val THEMES = linkedMapOf("system" to "System Default", "light" to "Light", "dark" to "Dark")
+private val THEMES = linkedMapOf("system" to "System Default", "light" to "Light", "dark" to "Dark", "amoled" to "Amoled Black")
 
 /** What WordCraft ships with that others made, and their licences. */
 private val OPEN_MATERIAL = listOf(

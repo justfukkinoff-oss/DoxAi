@@ -1,10 +1,12 @@
 package io.github.artcraftandroid.wordcraft
 
 import android.app.Application
+import android.content.Context
 import android.system.Os
 import io.github.artcraftandroid.wordcraft.core.MobileSession
 import io.github.artcraftandroid.wordcraft.core.initLogging
 import io.github.artcraftandroid.wordcraft.engine.Engine
+import io.github.artcraftandroid.wordcraft.mcp.McpService
 import java.io.File
 import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
@@ -15,6 +17,13 @@ import kotlinx.coroutines.async
 
 class WordcraftApplication : Application() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun onCreate() {
+        super.onCreate()
+        if (getSharedPreferences("settings", Context.MODE_PRIVATE).getBoolean("mcp", false)) {
+            McpService.setRunning(this, true)
+        }
+    }
 
     /** The engine, loaded once per process on a background thread and shared by the screens. */
     val engine: Deferred<Result<Engine>> by lazy {
