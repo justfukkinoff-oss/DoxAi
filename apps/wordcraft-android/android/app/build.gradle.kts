@@ -282,7 +282,7 @@ android {
     ndkVersion = "29.0.14206865"
 
     defaultConfig {
-        applicationId = "io.github.artcraftandroid.wordcraft"
+        applicationId = "ai.doxai.app"
         minSdk = minApi
         targetSdk = 36
         versionCode = appVersionCode
@@ -423,6 +423,8 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.exifinterface)
+    implementation(libs.mcp.sdk.server)
+    implementation(libs.ktor.server.cio)
     implementation(libs.jna) { artifact { type = "aar" } }
     testImplementation(libs.junit)
 }

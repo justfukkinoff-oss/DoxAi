@@ -21,5 +21,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "WordCraft"
+rootProject.name = "DoxAi"
 include(":app")

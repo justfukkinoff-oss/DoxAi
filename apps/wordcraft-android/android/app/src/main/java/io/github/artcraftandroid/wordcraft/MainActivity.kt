@@ -152,7 +152,7 @@ class MainActivity : ComponentActivity() {
         } catch (_: ActivityNotFoundException) {
             vm.tell("No app on this phone can do that.")
         } catch (_: SecurityException) {
-            vm.tell("WordCraft isn't allowed to do that.")
+            vm.tell("DoxAi isn't allowed to do that.")
         }
     }
 

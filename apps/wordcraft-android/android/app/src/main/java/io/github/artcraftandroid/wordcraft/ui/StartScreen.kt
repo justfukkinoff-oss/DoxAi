@@ -221,7 +221,7 @@ private fun NewSheet(vm: AppViewModel, onClose: () -> Unit) {
         ) {
             Text("New", color = WordColors.OnPill, fontSize = 20.sp, modifier = Modifier.padding(16.dp))
             for ((label, template) in listOf("Blank document" to "blank", "Sample" to "sample", "Letter" to "letter", "Resume" to "resume", "Report" to "report")) {
-                OpenRow(if (template == "blank") LucideIcons.FilePlus2 else LucideIcons.FileText, label, if (template == "blank") "An empty page" else "A WordCraft template", enabled = vm.engine != null) {
+                OpenRow(if (template == "blank") LucideIcons.FilePlus2 else LucideIcons.FileText, label, if (template == "blank") "An empty page" else "A DoxAi template", enabled = vm.engine != null) {
                     onClose()
                     vm.newDocument(template)
                 }
