@@ -2,8 +2,8 @@
 <resources>
     <!-- the start screen's light surface, so nothing flashes before the first frame -->
     <color name="window_background">#FFFFFFFF</color>
-    <!-- DoxAi indigo, the app icon's field's lower gradient stop (assets/app-icon/doxai-512.png) -->
-    <color name="ic_launcher_background">#FF2F3EC7</color>
+    <!-- DoxAi navy, the app icon's field's lower gradient stop (assets/app-icon/doxai-512.png) -->
+    <color name="ic_launcher_background">#FF001470</color>
 
     <style name="Theme.WordCraft" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/window_background</item>
