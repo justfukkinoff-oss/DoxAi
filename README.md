@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/app-icon/wordcraft-1024.png" alt="WordCraft's app icon" width="128">
+  <img src="assets/app-icon/doxai-512.png" alt="DoxAi's app icon" width="128">
 </p>
 
 <h1 align="center">DoxAi</h1>
