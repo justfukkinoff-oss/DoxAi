@@ -565,7 +565,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
         override suspend fun typeText(text: String): Boolean {
             val e = engineAsync.await().getOrNull() ?: return false
-            val ok = runCatching { e.command { type_text(text) } }.isSuccess
+            val ok = runCatching { e.command { typeText(text) } }.isSuccess
             if (ok) refresh(e)
             return ok
         }
