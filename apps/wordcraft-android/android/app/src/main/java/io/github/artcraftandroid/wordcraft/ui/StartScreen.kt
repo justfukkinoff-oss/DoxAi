@@ -34,7 +34,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.artcraftandroid.wordcraft.R
 import io.github.artcraftandroid.wordcraft.engine.RecentFile
+import io.github.artcraftandroid.wordcraft.mcp.DoxAiMcpServer
+import io.github.artcraftandroid.wordcraft.ui.editor.SmallSwitch
 import io.github.artcraftandroid.wordcraft.ui.editor.bottomEdge
 import io.github.artcraftandroid.wordcraft.ui.editor.topEdge
 import java.util.Calendar
@@ -85,6 +89,7 @@ fun StartScreen(vm: AppViewModel, onOpen: () -> Unit) {
                     StartIcon(LucideIcons.Plus) { creating = true }
                 }
             }
+            McpCard(vm)
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 when (tab) {
                     "Recent" -> RecentList(vm, vm.recent.filter { query.isBlank() || it.name.contains(query, ignoreCase = true) }, onOpen)
@@ -113,6 +118,60 @@ private fun BottomTab(label: String, icon: ImageVector, selected: Boolean, modif
     Column(modifier.clickable(onClick = onClick).padding(top = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(22.dp))
         Text(label, color = tint, fontSize = 12.sp)
+    }
+}
+
+/**
+ * The agent (MCP) server, on the landing screen rather than inside a document's settings: a switch
+ * to run it and, while it runs, the endpoint (tap to copy) and the USB reach hint. Loopback only,
+ * no token: it lives on the device itself.
+ */
+@Composable
+private fun McpCard(vm: AppViewModel) {
+    val clipboard = LocalClipboardManager.current
+    var copied by remember { mutableStateOf(false) }
+    if (copied) {
+        androidx.compose.runtime.LaunchedEffect(copied) {
+            kotlinx.coroutines.delay(2000)
+            copied = false
+        }
+    }
+    Column(Modifier.fillMaxWidth().bottomEdge(WordColors.Divider).padding(start = 16.dp, top = 10.dp, bottom = 10.dp, end = 8.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Icon(LucideIcons.Link, contentDescription = null, tint = WordColors.Accent, modifier = Modifier.size(26.dp))
+            Spacer(Modifier.width(16.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Agent (MCP)", color = WordColors.OnPill, fontSize = 16.sp)
+                Text(
+                    if (!vm.mcpOn) "Let AI agents edit open documents over MCP"
+                    else if (copied) "Copied to clipboard"
+                    else "Tap the address to copy it",
+                    color = WordColors.OnSurface,
+                    fontSize = 13.sp,
+                )
+            }
+            Box(Modifier.size(48.dp).clickable { vm.chooseMcpOn(!vm.mcpOn) }, contentAlignment = Alignment.Center) {
+                SmallSwitch(vm.mcpOn)
+            }
+        }
+        if (vm.mcpOn) {
+            Spacer(Modifier.height(6.dp))
+            Text(
+                DoxAiMcpServer.URL,
+                color = WordColors.Accent,
+                fontSize = 14.sp,
+                modifier = Modifier.clickable {
+                    clipboard.setText(AnnotatedString(DoxAiMcpServer.URL))
+                    copied = true
+                }.padding(vertical = 4.dp),
+            )
+            Text(
+                "Reach it over USB: adb reverse tcp:${DoxAiMcpServer.PORT} tcp:${DoxAiMcpServer.PORT}",
+                color = WordColors.OnSurface,
+                fontSize = 13.sp,
+                modifier = Modifier.padding(vertical = 2.dp),
+            )
+        }
     }
 }
 
