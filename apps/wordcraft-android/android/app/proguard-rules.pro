@@ -4,3 +4,5 @@
 -keep class * implements com.sun.jna.** { *; }
 -keep class io.github.artcraftandroid.wordcraft.core.** { *; }
 -dontwarn java.awt.**
+# Ktor's optional IntelliJ debugger detector references this JVM-only API. Android does not ship it.
+-dontwarn java.lang.management.**
