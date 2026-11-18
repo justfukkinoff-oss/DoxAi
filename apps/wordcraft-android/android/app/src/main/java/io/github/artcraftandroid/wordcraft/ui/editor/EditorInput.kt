@@ -219,10 +219,9 @@ class EditorInputView(context: Context) : View(context) {
             return true
         }
 
-        override fun sendKeyEvent(event: KeyEvent): Boolean {
-            if (event.action == KeyEvent.ACTION_DOWN) view.handleKey(event)
-            return true
-        }
+        // No sendKeyEvent override: BaseInputConnection's default already dispatches the key
+        // event to the view, where onKeyDown forwards it to handleKey. Handling it here too
+        // would commit every key twice (LLIIKKEE THHIISS).
 
         override fun getTextBeforeCursor(n: Int, flags: Int): CharSequence {
             val before = listener?.textAround(n, 0)?.before.orEmpty() + view.composing

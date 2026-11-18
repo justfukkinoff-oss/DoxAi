@@ -1,13 +1,10 @@
 package io.github.artcraftandroid.wordcraft.mcp
 
 import android.content.Context
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
@@ -20,7 +17,6 @@ import io.modelcontextprotocol.kotlin.sdk.types.Implementation
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
-import java.security.SecureRandom
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -30,8 +26,8 @@ import kotlinx.serialization.json.put
 
 /**
  * The DoxAi agent server: the open document as an MCP server over Streamable HTTP, on loopback
- * only. A computer reaches it with `adb reverse tcp:8636 tcp:8636` and the token the Settings
- * screen shows; every request must carry it.
+ * only (nothing off the device can reach it). A computer reaches it with
+ * `adb reverse tcp:8636 tcp:8636`. No authentication: the endpoint lives on the device itself.
  */
 object DoxAiMcpServer {
     const val PORT = 8636
@@ -40,26 +36,9 @@ object DoxAiMcpServer {
     @Volatile
     private var host: EmbeddedServer<*, *>? = null
 
-    fun token(context: Context): String {
-        val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-        prefs.getString("mcpToken", null)?.let { return it }
-        val bytes = ByteArray(24)
-        SecureRandom().nextBytes(bytes)
-        val t = bytes.joinToString("") { "%02x".format(it) }
-        prefs.edit().putString("mcpToken", t).apply()
-        return t
-    }
-
     fun start(context: Context) {
         if (host != null) return
-        val expected = "Bearer ${token(context)}"
         host = embeddedServer(CIO, host = "127.0.0.1", port = PORT) {
-            intercept(ApplicationCallPipeline.Plugins) {
-                if (call.request.headers["Authorization"] != expected) {
-                    call.respond(HttpStatusCode.Unauthorized)
-                    finish()
-                }
-            }
             routing {
                 get("/health") { call.respondText("doxai-mcp") }
             }
